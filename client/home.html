@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cryptic Underground Chat - Home</title>
+  <style>
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: #181818;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-image: url('https://www.transparenttextures.com/patterns/diamond-upholstery.png');
+    }
+    .container {
+      max-width: 400px;
+      margin: 60px auto;
+      background: rgba(20,20,20,0.97);
+      border-radius: 10px;
+      box-shadow: 0 0 20px #222;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #ff2e63;
+      text-shadow: 0 0 10px #ff2e63, 0 0 20px #222;
+      margin-bottom: 30px;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ff2e63;
+      border-radius: 5px;
+      background: #222;
+      color: #ff2e63;
+      font-size: 1em;
+    }
+    button {
+      background: #ff2e63;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff2e63;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #252a34;
+      color: #ff2e63;
+    }
+    .link {
+      color: #08d9d6;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 20px;
+      display: block;
+    }
+    .error {
+      color: #ff2e63;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CREATE YOUR PROFILE</h1>
+    <form id="registerForm">
+      <input type="email" id="email" placeholder="Email" required><br>
+      <input type="text" id="username" placeholder="Username" required><br>
+      <input type="password" id="password" placeholder="Password" required><br>
+      <button type="submit">Sign Up</button>
+    </form>
+    <div id="codeSection" style="display:none;">
+      <input type="text" id="authCode" placeholder="Enter authentication code"><br>
+      <button onclick="confirmCode()">Confirm Code</button>
+    </div>
+    <span class="link" onclick="goToLogin()">Already have an account? Log in</span>
+    <div id="error" class="error"></div>
+    <div id="success" class="success"></div>
+  </div>
+  <script>
+    function goToLogin() {
+      window.location.href = 'login.html';
+    }
+    let email, username, password;
+    document.getElementById('registerForm').onsubmit = async function(e) {
+      e.preventDefault();
+      email = document.getElementById('email').value;
+      username = document.getElementById('username').value;
+      password = document.getElementById('password').value;
+      const res = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, username, password })
+      });
+      if (res.ok) {
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('codeSection').style.display = 'block';
+        document.getElementById('success').textContent = 'Check your email for the authentication code.';
+        document.getElementById('error').textContent = '';
+      } else {
+        document.getElementById('error').textContent = await res.text();
+        document.getElementById('success').textContent = '';
+      }
+    }
+    async function confirmCode() {
+      const code = document.getElementById('authCode').value;
+      const res = await fetch('/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code })
+      });
+      if (res.ok) {
+        document.getElementById('success').textContent = 'Email confirmed! You can now log in.';
+        document.getElementById('error').textContent = '';
+        setTimeout(() => goToLogin(), 2000);
+      } else {
+        document.getElementById('error').textContent = await res.text();
+        document.getElementById('success').textContent = '';
+      }
+    }
+  </script>
+</body>
+</html>
